@@ -58,7 +58,11 @@ DFSWithPruning:
         bl IsGoal
         tst r0, #1
         addne r8, #1
-        bne DFSWithPruning_Loop
+        movne r0, r5
+
+        movne r1, r8, lsl #3
+        addne r1, #80
+        bne DFSWithPruning_DrawSolution
 
         # we need to push 4 more states to the stack now. lets copy the popped element in the frontier
         # three more times first.
@@ -81,6 +85,7 @@ DFSWithPruning:
 
         subs r5, #32
 
+        # edit loop - edit the four added states w/ new values
         mov r10, #1
         str r10, [r5, r0, lsl #2]
         add r5, #32
@@ -100,6 +105,28 @@ DFSWithPruning:
         add r6, #4
 
         b DFSWithPruning_Loop 
+
+    DFSWithPruning_DrawSolution:
+        push {r4-r6}
+        mov r4, #28
+        mov r6, #0
+        
+        DFSWithPruning_DrawSolution_Loop:
+            ldr r5, [r0], #4
+            lsl r5, r4
+            orr r6, r5
+
+            subs r4, #4
+            bge DFSWithPruning_DrawSolution_Loop
+        
+        mov r0, r6
+        mov r2, r1
+        mov r1, #0
+        mov r3, #4
+        bl DrawHex
+        
+        pop {r4-r6}
+        b DFSWithPruning_Loop
     
 DFSWithPruning_LoopEnd:
     mov r0, r9

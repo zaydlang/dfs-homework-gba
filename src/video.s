@@ -11,10 +11,20 @@ SetupVideo:
 	ldr r1, =#0x0404
 	str r1, [r0]
 
-    # store white/black into palette ram
+    # load address of palette ram
     ldr r0, =#0x05000000
+
+    # white and black
     ldr r1, =#0x00007FFF
-    str r1, [r0]
+    strh r1, [r0], #4
+
+    # green and red
+    ldr r1, =#0x4FEC319F
+    str r1, [r0], #4
+
+    # gray
+    ldr r1, =0x00005294
+    str r1, [r0], #4
 
     bx lr
 
@@ -141,5 +151,82 @@ DrawText:
         sub r9, r10
         subs r2, #0x1
         bne DrawText_Character
+    
+    pop {r0-r12, pc}
+
+
+
+
+
+# NAME:       DrawDec()
+# PARAMETERS: r0 - dec number to display
+#             r1 - x position to start at
+#             r2 - y position to start at
+#             r3 - the color to use (byte)
+# RETURNS:    none. draws the hex number to screen
+
+DrawDec:
+    push {r0-r12, lr}
+
+    @ hex font is same as dec font tbh
+    ldr r5, =DEC_FONT
+
+    add r1, #64
+    ldr r9, =#0x06000000
+    ldr r4, =#240
+    mla r1, r4, r2, r1
+    add r9, r1
+    
+    mov r2, #0x8
+    DrawDec_Number:
+
+        @ and r4, r0, #0xF0000000
+        @ lsr r4, #28
+
+        @ mov r10, #0x8
+        @ lsl r6, r4, #0x3
+        @ add r6, r5
+
+
+        mov r1, #10
+
+        push {r3}
+        swi #0x60000
+        pop {r3}
+        
+        lsl r6, r1, #0x3
+        add r6, r5
+
+        mov r10, #0x8
+        DrawDec_NibbleLoop:
+            ldrb r7, [r6], #0x1
+
+            mov r11, #0x8
+            DrawDec_Row:
+                eor r12, r12
+
+                ands r8, r7, #0x1
+                lsr r7, #0x1
+
+                orrne r12, r3, lsl #0x8
+
+                ands r8, r7, #0x1
+                lsr r7, #0x1
+
+                orrne r12, r3
+
+                strh r12, [r9, r11]
+
+                subs r11, #0x2
+                bne DrawDec_Row
+            
+            add r9, #240
+            subs r10, #0x1
+            bne DrawDec_NibbleLoop
+        
+        ldr r10, =#1928
+        sub r9, r10
+        subs r2, #0x1
+        bne DrawDec_Number
     
     pop {r0-r12, pc}

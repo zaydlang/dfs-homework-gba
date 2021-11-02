@@ -1,4 +1,7 @@
+
+@ these fonts are virtually the same
 HEX_FONT:
+DEC_FONT:
     .byte 0b00000000
     .byte 0b01111110
     .byte 0b01000010
@@ -149,9 +152,9 @@ TEXT_FONT:
 
     .byte 0b00000000
     .byte 0b01111110
-    .byte 0b01000010
-    .byte 0b01011110
     .byte 0b01000000
+    .byte 0b01011110
+    .byte 0b01000010
     .byte 0b01000010
     .byte 0b01111110
     .byte 0b00000000
